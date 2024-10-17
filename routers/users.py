@@ -15,6 +15,7 @@ router = APIRouter(
     prefix='/users',
     tags=['users']
 )
+
 class UserRequestChangePassword(BaseModel):
     password : str
     new_password : str = Field(min_length=4)
@@ -73,4 +74,3 @@ async def update_phone_number (db: db_dependency,
     db.add(user_model)
     db.commit()
 
-# Vlad - 12345

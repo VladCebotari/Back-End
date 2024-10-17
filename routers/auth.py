@@ -114,9 +114,6 @@ async def login_for_access_token (form_data : Annotated[OAuth2PasswordRequestFor
     return {'access_token':token,'token_type': 'bearer'}
 
 
-# Email validation --
-# 1)To check if "@gmail.com" is in email and then to send an email to the person with a link in it.
-# 2)When a person clicks that link he access an endpoint that sends me a confirmation that this is his email.
 
 # The implementation:
 # create a new gmail acc
