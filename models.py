@@ -16,7 +16,6 @@ class Users(Base):
     role = Column(String)
     phone_number = Column(String)
 
-    # Relationships
     dishes = relationship("Dish", back_populates="user")
     reviews = relationship("Review", back_populates="user")
     ratings = relationship("Rating", back_populates="user")

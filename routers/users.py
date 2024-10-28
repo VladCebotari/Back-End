@@ -23,6 +23,8 @@ class UserRequestChangePassword(BaseModel):
 class UserRequestChangePhoneNumber(BaseModel):
     new_phone_number : str
 
+class UserRequestChangeEmail(BaseModel):
+    new_email : str
 
 def get_db():
     db=SessionLocal()
@@ -47,6 +49,23 @@ async def return_user(user: user_dependency,
     return db.query(Users).filter(user.get('id') == Users.id).all()
 
 
+# @router.put("/change_email",status_code=status.HTTP_204_NO_CONTENT)
+# async def update_phone_number (db: db_dependency,
+#                                user: user_dependency,
+#                                user_request: UserRequestChangeEmail):
+#     if user is None:
+#         raise HTTPException(status_code=401, detail='Not authenticated')
+#     user_model = db.query(Users).filter(user.get("id") == Users.id).first()
+#     user_model.phone_number = user_request.new_phone_number
+#
+#     db.add(user_model)
+#     db.commit()
+#
+# @router.put("/change_username",status_code=status.HTTP_204_NO_CONTENT)
+
+
+
+
 @router.put("/change_password",status_code=status.HTTP_204_NO_CONTENT)
 async def change_password(user: user_dependency,
                       db: db_dependency,
@@ -62,6 +81,7 @@ async def change_password(user: user_dependency,
     db.add(user_model)
     db.commit()
 
+
 @router.put("/update_phone_number",status_code=status.HTTP_204_NO_CONTENT)
 async def update_phone_number (db: db_dependency,
                                user: user_dependency,
@@ -74,3 +94,7 @@ async def update_phone_number (db: db_dependency,
     db.add(user_model)
     db.commit()
 
+# like
+# search
+# follow
+# notifications

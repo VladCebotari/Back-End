@@ -85,7 +85,7 @@ async def get_current_user(token :Annotated[str,Depends(oauth2_bearer)]):
 
 
 
-@router.post("/signsup",status_code=status.HTTP_201_CREATED)
+@router.post("/signup",status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
     create_user_model = Users (
         email = create_user_request.email,
@@ -112,11 +112,3 @@ async def login_for_access_token (form_data : Annotated[OAuth2PasswordRequestFor
     token=create_access_token(user.username,user.id,user.role,timedelta(minutes=20))
     return {'access_token':token,'token_type': 'bearer'}
 
-
-
-# The implementation:
-# create a new gmail acc
-#library for validation of poitn 1
-# yagmail or smth similar to send an email
-#endpoint that should be accessed
-#link generation
