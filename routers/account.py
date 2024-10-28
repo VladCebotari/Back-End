@@ -40,3 +40,4 @@ def open_settings(user=user_dependency,db=db_dependency):
 def update_profile_picture(user=user_dependency,db=db_dependency):
     if user is None:
         raise HTTPException(status_code=401,detail="authentication failed")
+    
