@@ -87,6 +87,19 @@ async def get_current_user(token :Annotated[str,Depends(oauth2_bearer)]):
 
 @router.post("/signup",status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
+    existing_user=db.query(Users).filter(
+        (Users.username == create_user_request.username) |
+        (Users.email == create_user_request.email )
+    ).first()
+
+
+    if existing_user:
+        if existing_user.username == create_user_request.username:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+        if existing_user.email == create_user_request.email:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+
+
     create_user_model = Users (
         email = create_user_request.email,
         username = create_user_request.username,
