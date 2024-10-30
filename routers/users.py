@@ -26,6 +26,9 @@ class UserRequestChangePhoneNumber(BaseModel):
 class UserRequestChangeEmail(BaseModel):
     new_email : str
 
+class UserRequestChangeUsername(BaseModel):
+    new_username : str
+
 def get_db():
     db=SessionLocal()
     try:
@@ -49,21 +52,32 @@ async def return_user(user: user_dependency,
     return db.query(Users).filter(user.get('id') == Users.id).all()
 
 
-# @router.put("/change_email",status_code=status.HTTP_204_NO_CONTENT)
-# async def update_phone_number (db: db_dependency,
-#                                user: user_dependency,
-#                                user_request: UserRequestChangeEmail):
-#     if user is None:
-#         raise HTTPException(status_code=401, detail='Not authenticated')
-#     user_model = db.query(Users).filter(user.get("id") == Users.id).first()
-#     user_model.phone_number = user_request.new_phone_number
-#
-#     db.add(user_model)
-#     db.commit()
-#
+@router.put("/change_email",status_code=status.HTTP_204_NO_CONTENT)
+async def update_email (   db: db_dependency,
+                           user: user_dependency,
+                           user_request: UserRequestChangeEmail):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Not authenticated')
+    user_model = db.query(Users).filter(user.get("id") == Users.id).first()
+    user_model.email = user_request.new_email
+
+    db.add(user_model)
+    db.commit()
+
+
+
 # @router.put("/change_username",status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/change_username",status_code=status.HTTP_204_NO_CONTENT)
+def update_username (db: db_dependency,
+                     user: user_dependency,
+                     user_request: UserRequestChangeUsername):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Not authenticated')
+    user_model = db.query(Users).filter(user.get("id") == Users.id).first()
+    user_model.username = user_request.new_username
 
-
+    db.add(user_model)
+    db.commit()
 
 
 @router.put("/change_password",status_code=status.HTTP_204_NO_CONTENT)
