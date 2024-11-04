@@ -29,6 +29,12 @@ class UserRequestChangeEmail(BaseModel):
 class UserRequestChangeUsername(BaseModel):
     new_username : str
 
+class UserRequestChangeFirstname(BaseModel):
+    new_firstname : str
+
+class UserRequestChangeLastname(BaseModel):
+    new_lastname : str
+
 def get_db():
     db=SessionLocal()
     try:
@@ -63,6 +69,36 @@ async def update_email (   db: db_dependency,
 
     db.add(user_model)
     db.commit()
+
+
+@router.put("/change_firstname",status_code=status.HTTP_204_NO_CONTENT)
+async def update_firstname (   db: db_dependency,
+                           user: user_dependency,
+                           user_request: UserRequestChangeFirstname):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Not authenticated')
+    user_model = db.query(Users).filter(user.get("id") == Users.id).first()
+    user_model.firstname = user_request.new_firstname
+
+    db.add(user_model)
+    db.commit()
+
+@router.put("/change_lastname",status_code=status.HTTP_204_NO_CONTENT)
+async def update_firstname (   db: db_dependency,
+                           user: user_dependency,
+                           user_request: UserRequestChangeLastname):
+    if user is None:
+        raise HTTPException(status_code=401, detail='Not authenticated')
+    user_model = db.query(Users).filter(user.get("id") == Users.id).first()
+    user_model.lastname = user_request.new_lastname
+
+    db.add(user_model)
+    db.commit()
+
+
+
+
+
 
 
 
