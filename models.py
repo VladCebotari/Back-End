@@ -29,7 +29,6 @@ class Dish(Base):
     name = Column(String, nullable=False)
     description = Column(Text)
     ingredients = Column(Text)
-    instructions = Column(Text)
     image = Column(String)
 
     user = relationship("Users", back_populates="dishes")  # Changed to Users

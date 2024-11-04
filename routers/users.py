@@ -97,12 +97,6 @@ async def update_firstname (   db: db_dependency,
 
 
 
-
-
-
-
-
-# @router.put("/change_username",status_code=status.HTTP_204_NO_CONTENT)
 @router.put("/change_username",status_code=status.HTTP_204_NO_CONTENT)
 def update_username (db: db_dependency,
                      user: user_dependency,
@@ -143,8 +137,3 @@ async def update_phone_number (db: db_dependency,
 
     db.add(user_model)
     db.commit()
-
-# like
-# search
-# follow
-# notifications
