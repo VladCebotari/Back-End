@@ -84,7 +84,7 @@ async def update_firstname (   db: db_dependency,
     db.commit()
 
 @router.put("/change_lastname",status_code=status.HTTP_204_NO_CONTENT)
-async def update_firstname (   db: db_dependency,
+async def update_lastname (   db: db_dependency,
                            user: user_dependency,
                            user_request: UserRequestChangeLastname):
     if user is None:

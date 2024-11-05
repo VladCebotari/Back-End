@@ -28,7 +28,6 @@ user_dependency = Annotated[dict,Depends(get_current_user)]
 
 
 class DishRequest(BaseModel):
-    image : UploadFile
     name: str
     description : str
     ingredients : str
@@ -36,13 +35,18 @@ class DishRequest(BaseModel):
 
 @router.post("/dishes",status_code=status.HTTP_201_CREATED)
 async def post_dish(user : user_dependency,
-                    db   : db_dependency,
-                    dish_request : DishRequest):
+                    db: db_dependency,
+                    image : UploadFile = File(...),
+                    dish_request : DishRequest = Depends()):
+
     if user is None:
         raise HTTPException(status_code=401, detail="authentication failed")
-    user_image = await dish_request.image.read()
+
+    user_image = await image.read()
     user_image_base64 = base64.b64encode(user_image).decode("utf-8")
+
     create_dish_model = Dish (
+        user_id = user.get("id"),
         image = user_image_base64,
         name = dish_request.name,
         description = dish_request.description,
@@ -52,6 +56,7 @@ async def post_dish(user : user_dependency,
     db.add(create_dish_model)
     db.commit()
 
+    return {"message": "Dish posted successfully"}
 
 
 
