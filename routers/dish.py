@@ -2,13 +2,13 @@ from typing import Annotated
 
 
 from sqlalchemy.orm import Session
-from fastapi import APIRouter,Depends,HTTPException,Path,UploadFile,File
+from fastapi import APIRouter,Depends,HTTPException,UploadFile,File
 from database import SessionLocal
 from starlette import status
-from pydantic import BaseModel,Field
+from pydantic import BaseModel
 
-from models import Users,Dish
-from .auth import get_current_user,CreateUserRequest
+from models import Dish
+from routers.auth import get_current_user
 import base64
 
 
