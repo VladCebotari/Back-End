@@ -2,7 +2,7 @@ from typing import Annotated
 
 
 from sqlalchemy.orm import Session
-from fastapi import APIRouter,Depends,HTTPException,UploadFile,File
+from fastapi import APIRouter,Depends,HTTPException,UploadFile,File,Form
 from database import SessionLocal
 from starlette import status
 from pydantic import BaseModel
@@ -37,7 +37,11 @@ class DishRequest(BaseModel):
 async def post_dish(user : user_dependency,
                     db: db_dependency,
                     image : UploadFile = File(...),
-                    dish_request : DishRequest = Depends()):
+                    # dish_name : str = Form(...),
+                    # dish_description : str = Form(...),
+                    # dish_ingredients : str = Form(...)
+                    dish_request : DishRequest = Depends()
+                    ):
 
     if user is None:
         raise HTTPException(status_code=401, detail="authentication failed")
@@ -48,6 +52,9 @@ async def post_dish(user : user_dependency,
     create_dish_model = Dish (
         user_id = user.get("id"),
         image = user_image_base64,
+        # name = dish_name,
+        # description = dish_description,
+        # ingredients = dish_ingredients
         name = dish_request.name,
         description = dish_request.description,
         ingredients = dish_request.ingredients
