@@ -1,8 +1,10 @@
 from typing import Annotated
 
-
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from fastapi import APIRouter,Depends,HTTPException,UploadFile,File,Form
+from starlette.responses import JSONResponse
+
 from database import SessionLocal
 from starlette import status
 from pydantic import BaseModel
@@ -27,20 +29,15 @@ db_dependency = Annotated[Session,Depends(get_db)]
 user_dependency = Annotated[dict,Depends(get_current_user)]
 
 
-class DishRequest(BaseModel):
-    name: str
-    description : str
-    ingredients : str
 
 
 @router.post("/dishes",status_code=status.HTTP_201_CREATED)
 async def post_dish(user : user_dependency,
                     db: db_dependency,
                     image : UploadFile = File(...),
-                    # dish_name : str = Form(...),
-                    # dish_description : str = Form(...),
-                    # dish_ingredients : str = Form(...)
-                    dish_request : DishRequest = Depends()
+                    name : str = Form(...),
+                    description : str = Form(...),
+                    ingredients : str = Form(...)
                     ):
 
     if user is None:
@@ -52,12 +49,9 @@ async def post_dish(user : user_dependency,
     create_dish_model = Dish (
         user_id = user.get("id"),
         image = user_image_base64,
-        # name = dish_name,
-        # description = dish_description,
-        # ingredients = dish_ingredients
-        name = dish_request.name,
-        description = dish_request.description,
-        ingredients = dish_request.ingredients
+        name = name,
+        description = description,
+        ingredients = ingredients
     )
 
     db.add(create_dish_model)
@@ -67,5 +61,19 @@ async def post_dish(user : user_dependency,
 
 
 
+@router.get("/search",status_code=status.HTTP_200_OK)
+async def search_dishes(user : user_dependency,
+                        db: db_dependency,
+                        name : str = Form(...)
+                        ):
+    if user is None:
+        raise HTTPException(status_code=401,detail="authentication failed")
+
+    search_term = f"%{name}%"
+    try:
+        dishes = db.query(Dish.name).filter(Dish.name.ilike(search_term)).all()
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail="Database query error") from e
 
 
+    return JSONResponse(content=[dish[0] for dish in dishes])
