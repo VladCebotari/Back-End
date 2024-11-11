@@ -64,6 +64,11 @@ async def update_email (   db: db_dependency,
                            user_request: UserRequestChangeEmail):
     if user is None:
         raise HTTPException(status_code=401, detail='Not authenticated')
+
+    existing_user = db.query(Users.email).filter(Users.email == user_request.new_email).first()
+    if existing_user:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
+
     user_model = db.query(Users).filter(user.get("id") == Users.id).first()
     user_model.email = user_request.new_email
 
@@ -103,11 +108,18 @@ def update_username (db: db_dependency,
                      user_request: UserRequestChangeUsername):
     if user is None:
         raise HTTPException(status_code=401, detail='Not authenticated')
+
+    existing_user = db.query(Users.username).filter(Users.username == user_request.new_username).first()
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+
     user_model = db.query(Users).filter(user.get("id") == Users.id).first()
     user_model.username = user_request.new_username
 
     db.add(user_model)
     db.commit()
+
+
 
 
 @router.put("/change_password",status_code=status.HTTP_204_NO_CONTENT)
