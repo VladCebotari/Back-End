@@ -2,7 +2,7 @@ from typing import Annotated
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from fastapi import APIRouter,Depends,HTTPException,UploadFile,File,Form
+from fastapi import APIRouter,Depends,HTTPException,UploadFile,File,Form,Query
 from starlette.responses import JSONResponse
 
 from database import SessionLocal
@@ -64,16 +64,24 @@ async def post_dish(user : user_dependency,
 @router.get("/search",status_code=status.HTTP_200_OK)
 async def search_dishes(user : user_dependency,
                         db: db_dependency,
-                        name : str = Form(...)
+                        name : str = Query(...)
                         ):
     if user is None:
         raise HTTPException(status_code=401,detail="authentication failed")
 
     search_term = f"%{name}%"
     try:
-        dishes = db.query(Dish.name).filter(Dish.name.ilike(search_term)).all()
+        dishes = db.query(Dish).filter(Dish.name.ilike(search_term)).all()
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail="Database query error") from e
 
 
-    return JSONResponse(content=[dish[0] for dish in dishes])
+    # return JSONResponse(content=[dish[0] for dish in dishes])
+    return JSONResponse(content=[{
+        "dish_id": dish.dish_id,
+        "user_id": dish.user_id,
+        "name": dish.name,
+        "description": dish.description,
+        "ingredients": dish.ingredients,
+        "image": dish.image
+    } for dish in dishes])
