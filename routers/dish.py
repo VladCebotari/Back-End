@@ -51,7 +51,7 @@ async def post_dish(user : user_dependency,
         image = user_image_base64,
         name = name,
         description = description,
-        ingredients = ingredients
+        ingredients = ingredients,
     )
 
     db.add(create_dish_model)
@@ -78,22 +78,22 @@ async def search_dishes(user : user_dependency,
 
     return JSONResponse(content=[dish[0] for dish in dishes])
 
-# @router.post("/dishes/{dish_id}/like",status_code=status.HTTP_201_CREATED)
-# async def like_dish (user : user_dependency,
-#                      db : db_dependency,
-#                      dish_id : int ):
-#     dish = db.query(Dish).filter(Dish.dish_id == dish_id ).first()
-#     if not dish:
-#         raise HTTPException(status_code=404,detail="Dish not found")
-#
-#     existing_like = db.query(Like).filter(Like.dish_id == dish_id,Like.user_id == user.get("id") ).first()
-#     if existing_like:
-#         raise HTTPException(status_code=400,detail="You already liked this dish")
-#
-#     like = Like(dish_id = dish_id ,user_id = user.get("id"))
-#     db.add(like)
-#     db.commit()
-#
-#     Dish.like_count+=1
-#     db.commit()
-#     return {"message": "Dish liked successfully", "like_count": Dish.like_count}
+@router.post("/dishes/{dish_id}/like",status_code=status.HTTP_201_CREATED)
+async def like_dish (user : user_dependency,
+                     db : db_dependency,
+                     dish_id : int ):
+    dish = db.query(Dish).filter(Dish.dish_id == dish_id ).first()
+    if not dish:
+        raise HTTPException(status_code=404,detail="Dish not found")
+
+    existing_like = db.query(Like).filter(Like.dish_id == dish_id,Like.user_id == user.get("id") ).first()
+    if existing_like:
+        raise HTTPException(status_code=400,detail="You already liked this dish")
+
+    like = Like(dish_id = dish_id ,user_id = user.get("id"))
+    db.add(like)
+    db.commit()
+
+    dish.like_count+=1
+    db.commit()
+    return {"message": "Dish liked successfully", "like_count": Dish.like_count}
