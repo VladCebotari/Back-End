@@ -9,7 +9,7 @@ from database import SessionLocal
 from starlette import status
 from pydantic import BaseModel
 
-from models import Dish
+from models import Dish, Like
 from routers.auth import get_current_user
 import base64
 
@@ -51,7 +51,7 @@ async def post_dish(user : user_dependency,
         image = user_image_base64,
         name = name,
         description = description,
-        ingredients = ingredients
+        ingredients = ingredients,
     )
 
     db.add(create_dish_model)
@@ -75,8 +75,6 @@ async def search_dishes(user : user_dependency,
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail="Database query error") from e
 
-
-    # return JSONResponse(content=[dish[0] for dish in dishes])
     return JSONResponse(content=[{
         "dish_id": dish.dish_id,
         "user_id": dish.user_id,
@@ -85,3 +83,5 @@ async def search_dishes(user : user_dependency,
         "ingredients": dish.ingredients,
         "image": dish.image
     } for dish in dishes])
+
+

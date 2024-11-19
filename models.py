@@ -19,7 +19,7 @@ class Users(Base):
     dishes = relationship("Dish", back_populates="user")
     reviews = relationship("Review", back_populates="user")
     ratings = relationship("Rating", back_populates="user")
-
+    likes = relationship("Like", back_populates="user")
 
 class Dish(Base):
     __tablename__ = 'dish'
@@ -30,10 +30,26 @@ class Dish(Base):
     description = Column(Text)
     ingredients = Column(Text)
     image = Column(String)
+    like_count = Column (Integer, default=0)
 
     user = relationship("Users", back_populates="dishes")  # Changed to Users
     reviews = relationship("Review", back_populates="dish")
     ratings = relationship("Rating", back_populates="dish")
+    likes = relationship("Like",back_populates="dish")
+
+
+
+class Like(Base):
+    __tablename__ = 'like'
+
+    like_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    dish_id = Column(Integer, ForeignKey('dish.dish_id'), nullable=False)
+
+    user = relationship("Users", back_populates="likes")
+    dish = relationship("Dish", back_populates="likes")
+
+    __table_args__ = (UniqueConstraint('user_id', 'dish_id', name='unique_user_dish_like'),)
 
 
 class Review(Base):
