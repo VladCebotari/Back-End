@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import Session
 from fastapi import APIRouter,Depends,HTTPException,UploadFile,File,Form,Query
 from starlette.responses import JSONResponse
@@ -96,10 +96,18 @@ async def like_dish (user : user_dependency,
     if existing_like:
         raise HTTPException(status_code=400,detail="You already liked this dish")
 
-    like = Like(dish_id = dish_id ,user_id = user.get("id"))
-    db.add(like)
-    db.commit()
+    try:
+        new_like = Like(dish_id=dish_id, user_id=user.get("id"))
+        db.add(new_like)
+        # Increment like_count safely
+        db.query(Dish).filter(Dish.dish_id == dish_id).update(
+            {"like_count": Dish.like_count + 1},
+            synchronize_session="fetch"
+        )
+        db.commit()
+        db.refresh(dish)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to like the dish. Please try again.")
 
-    dish.like_count+=1
-    db.commit()
     return {"message": "Dish liked successfully", "like_count": dish.like_count}
