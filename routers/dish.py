@@ -99,7 +99,6 @@ async def like_dish (user : user_dependency,
     try:
         new_like = Like(dish_id=dish_id, user_id=user.get("id"))
         db.add(new_like)
-        # Increment like_count safely
         db.query(Dish).filter(Dish.dish_id == dish_id).update(
             {"like_count": Dish.like_count + 1},
             synchronize_session="fetch"
