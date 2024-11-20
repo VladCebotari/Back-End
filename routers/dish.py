@@ -110,3 +110,31 @@ async def like_dish (user : user_dependency,
         raise HTTPException(status_code=500, detail="Failed to like the dish. Please try again.")
 
     return {"message": "Dish liked successfully", "like_count": dish.like_count}
+
+
+@router.post("/dishes/{dish_id}/unlike",status_code=status.HTTP_201_CREATED)
+async def like_dish (user : user_dependency,
+                     db : db_dependency,
+                     dish_id : int ):
+    dish = db.query(Dish).filter(Dish.dish_id == dish_id ).first()
+    if not dish:
+        raise HTTPException(status_code=404,detail="Dish not found")
+
+    existing_like = db.query(Like).filter(Like.dish_id == dish_id,Like.user_id == user.get("id") ).first()
+    if not existing_like:
+        raise HTTPException(status_code=400,detail="You did not liked this dish")
+
+    try:
+        db.delete(existing_like)
+        
+        db.query(Dish).filter(Dish.dish_id == dish_id).update(
+            {"like_count": Dish.like_count - 1},
+            synchronize_session="fetch"
+        )
+        db.commit()
+        db.refresh(dish)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to like the dish. Please try again.")
+
+    return {"message": "Dish unliked successfully", "like_count": dish.like_count}

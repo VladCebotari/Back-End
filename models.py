@@ -35,7 +35,7 @@ class Dish(Base):
     user = relationship("Users", back_populates="dishes")  # Changed to Users
     reviews = relationship("Review", back_populates="dish")
     ratings = relationship("Rating", back_populates="dish")
-    likes = relationship("Like",back_populates="dish")
+    likes = relationship("Like",back_populates="dish",cascade="all,delete")
 
 
 
