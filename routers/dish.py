@@ -59,6 +59,12 @@ async def post_dish(user : user_dependency,
 
     return {"message": "Dish posted successfully"}
 
+@router.get("/get_all",status_code=status.HTTP_200_OK)
+async def get_all_dishes(db: db_dependency):
+    dishes = db.query(Dish).all()
+    return dishes
+
+
 
 
 @router.get("/search",status_code=status.HTTP_200_OK)
