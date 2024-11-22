@@ -1,3 +1,5 @@
+from email.policy import default
+
 from database import Base
 from sqlalchemy import Column, Integer, String, BOOLEAN, ForeignKey, Text, DateTime, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
@@ -50,6 +52,18 @@ class Like(Base):
     dish = relationship("Dish", back_populates="likes")
 
     __table_args__ = (UniqueConstraint('user_id', 'dish_id', name='unique_user_dish_like'),)
+
+
+class Followers(Base):
+    __tablename__ = 'followers'
+    connection_id = Column(Integer, primary_key=True, autoincrement=True)
+    follower_id = Column(Integer,ForeignKey('users.id'),nullable=False)
+    followed_id = Column(Integer,ForeignKey('users.id'),nullable=False)
+    timestamp = Column (DateTime(timezone=True), default=func.now)
+
+
+    __tableargs__ = (UniqueConstraint('follower_id','followed_id',name = 'unique_follower_followed_connection'),)
+
 
 
 class Review(Base):
