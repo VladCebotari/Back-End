@@ -5,6 +5,9 @@ from sqlalchemy import Column, Integer, String, BOOLEAN, ForeignKey, Text, DateT
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+
+
+
 class Users(Base):
     __tablename__ = 'users'
 
@@ -23,6 +26,21 @@ class Users(Base):
     ratings = relationship("Rating", back_populates="user")
     likes = relationship("Like", back_populates="user")
 
+    followers = relationship(
+        "Followers",
+        back_populates="followed",
+        foreign_keys=[Followers.followed_id],
+        cascade="all, delete"
+    )
+
+    # Relationship for users whom this user is following
+    following = relationship(
+        "Followers",
+        back_populates="follower",
+        foreign_keys=[Followers.follower_id],
+        cascade="all, delete"
+    )
+
 class Dish(Base):
     __tablename__ = 'dish'
 
@@ -34,7 +52,7 @@ class Dish(Base):
     image = Column(String)
     like_count = Column (Integer, default=0)
 
-    user = relationship("Users", back_populates="dishes")  # Changed to Users
+    user = relationship("Users", back_populates="dishes")
     reviews = relationship("Review", back_populates="dish")
     ratings = relationship("Rating", back_populates="dish")
     likes = relationship("Like",back_populates="dish",cascade="all,delete")
@@ -61,9 +79,10 @@ class Followers(Base):
     followed_id = Column(Integer,ForeignKey('users.id'),nullable=False)
     timestamp = Column (DateTime(timezone=True), default=func.now)
 
+    follower = relationship("Users", back_populates="followers", foreign_keys=[follower_id])
+    followed = relationship("Users", back_populates="following", foreign_keys=[followed_id])
 
-    __tableargs__ = (UniqueConstraint('follower_id','followed_id',name = 'unique_follower_followed_connection'),)
-
+    __tableargs__ = (UniqueConstraint('follower_id', 'followed_id', name='unique_follower_followed_connection'),)
 
 
 class Review(Base):

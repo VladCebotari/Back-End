@@ -9,7 +9,7 @@ from database import SessionLocal
 from starlette import status
 from pydantic import BaseModel
 
-# from models import Users,Follow
+from models import Users,Followers
 from routers.auth import get_current_user
 
 
