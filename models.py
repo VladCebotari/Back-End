@@ -1,17 +1,26 @@
-from email.policy import default
-
 from database import Base
 from sqlalchemy import Column, Integer, String, BOOLEAN, ForeignKey, Text, DateTime, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
+class Followers(Base):
+    __tablename__ = 'followers'
+    connection_id = Column(Integer, primary_key=True, autoincrement=True)
+    follower_id = Column(Integer,ForeignKey('users.id'),nullable=False)
+    followed_id = Column(Integer,ForeignKey('users.id'),nullable=False)
+    timestamp = Column(DateTime(timezone=True), default=func.now())
+
+    follower = relationship("Users", back_populates="followers", foreign_keys=[follower_id])
+    followed = relationship("Users", back_populates="following", foreign_keys=[followed_id])
+
+    __tableargs__ = (UniqueConstraint('follower_id', 'followed_id', name='unique_follower_followed_connection'),)
 
 
 class Users(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     email = Column(String, unique=True)
     username = Column(String, unique=True)
     firstname = Column(String)
@@ -28,16 +37,15 @@ class Users(Base):
 
     followers = relationship(
         "Followers",
-        back_populates="followed",
-        foreign_keys=[Followers.followed_id],
+        back_populates="follower",
+        foreign_keys=[Followers.follower_id],
         cascade="all, delete"
     )
 
-    # Relationship for users whom this user is following
     following = relationship(
         "Followers",
-        back_populates="follower",
-        foreign_keys=[Followers.follower_id],
+        back_populates="followed",
+        foreign_keys=[Followers.followed_id],
         cascade="all, delete"
     )
 
@@ -50,7 +58,7 @@ class Dish(Base):
     description = Column(Text)
     ingredients = Column(Text)
     image = Column(String)
-    like_count = Column (Integer, default=0)
+    like_count = Column(Integer, default=0)
 
     user = relationship("Users", back_populates="dishes")
     reviews = relationship("Review", back_populates="dish")
@@ -72,17 +80,6 @@ class Like(Base):
     __table_args__ = (UniqueConstraint('user_id', 'dish_id', name='unique_user_dish_like'),)
 
 
-class Followers(Base):
-    __tablename__ = 'followers'
-    connection_id = Column(Integer, primary_key=True, autoincrement=True)
-    follower_id = Column(Integer,ForeignKey('users.id'),nullable=False)
-    followed_id = Column(Integer,ForeignKey('users.id'),nullable=False)
-    timestamp = Column (DateTime(timezone=True), default=func.now)
-
-    follower = relationship("Users", back_populates="followers", foreign_keys=[follower_id])
-    followed = relationship("Users", back_populates="following", foreign_keys=[followed_id])
-
-    __tableargs__ = (UniqueConstraint('follower_id', 'followed_id', name='unique_follower_followed_connection'),)
 
 
 class Review(Base):
@@ -114,7 +111,7 @@ class Rating(Base):
     __table_args__ = (UniqueConstraint('dish_id', 'user_id', name='unique_dish_user_rating'),)
 
 class Todos(Base):
-    __tablename__= 'todos'
+    __tablename__ = 'todos'
 
     id = Column(Integer,primary_key=True,index=True)
     title = Column(String)
