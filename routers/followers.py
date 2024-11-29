@@ -56,7 +56,7 @@ async def follow_user(user : user_dependency,
 
     return {"message": "You are now following the user."}
 
-@router.post("/unfollow/{username}",status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/unfollow/{username}",status_code=status.HTTP_200_OK)
 async def unfollow_user(user : user_dependency,
                         db: db_dependency,
                         username : str):
@@ -66,8 +66,20 @@ async def unfollow_user(user : user_dependency,
     if not existing_user:
         raise HTTPException(status_code=400, detail="The user you're trying to unfollow doesn't exist")
     followed_id = db.query(Users.id).filter(Users.username == username).first()[0]
-    existing_follow = db.query(Users).filter(user.get("id") == Followers.follower_id,followed_id == Followers.followed_id).first()
-#     db something etc...
+    existing_follow = db.query(Followers).filter(user.get("id") == Followers.follower_id,followed_id == Followers.followed_id).first()
+
+    if not existing_follow:
+        raise HTTPException(status_code=400, detail="You are not following this user")
+
+    try:
+        db.delete(existing_follow)
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(status_code=409,detail="Something went wrong try one more time")
+
+    return {"message":"You unfollowed this user"}
+
 @router.get("/get_followers",status_code=status.HTTP_200_OK)
 async def get_followers():
     pass
