@@ -25,14 +25,23 @@ def get_db():
 db_dependency = Annotated[Session,Depends(get_db)]
 user_dependency = Annotated[dict,Depends(get_current_user)]
 
-@router.post("/follow/{followed_id}",status_code=status.HTTP_201_CREATED)
+@router.post("/follow/{username}",status_code=status.HTTP_201_CREATED)
 async def follow_user(user : user_dependency,
                       db : db_dependency,
-                      followed_id : int):
+                      username : str):
+
     if user is None:
         raise HTTPException(status_code=401,detail="Not authenticated")
+
+    existing_user = db.query(Users).filter(Users.username == username).first()
+    if not existing_user:
+        raise HTTPException(status_code=400, detail="The user you're trying to follow doesn't exist")
+
+    followed_id = db.query(Users.id).filter(Users.username == username).first()[0]
     if user.get("id") == followed_id:
         raise HTTPException(status_code=400,detail="You can't follow yourself")
+
+
 
     new_follow = Followers (
         follower_id = user.get("id"),
