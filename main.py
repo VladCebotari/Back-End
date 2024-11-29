@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from database import engine
 import uvicorn
 import models
-from routers import auth,todos,admin,users,account,dish
+from routers import auth,todos,admin,users,account,dish,followers
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -16,7 +16,7 @@ app.include_router(admin.router)
 app.include_router(users.router)
 app.include_router(account.router)
 app.include_router(dish.router)
-
+app.include_router(followers.router)
 
 app.add_middleware(
     CORSMiddleware,
