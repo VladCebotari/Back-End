@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from models import Users
 from database import SessionLocal
@@ -26,10 +26,14 @@ user_dependency = Annotated[dict,Depends(get_current_user)]
 
 
 @router.get("/notifications",status_code=status.HTTP_201_CREATED)
-def see_all_notifications(user=user_dependency,db=db_dependency):
+async def see_all_notifications(user=user_dependency,db=db_dependency):
     if user is None:
         raise HTTPException(status_code=401,detail="authentication failed")
 
-
+@router.post("/add_profile_picture",status_code=status.HTTP_204_NO_CONTENT)
+async def add_profile_picture (user: user_dependency,
+                               db : db_dependency,
+                               pfp_image: UploadFile = File(...)):
+    pass
 
 
