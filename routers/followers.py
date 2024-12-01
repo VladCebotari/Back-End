@@ -81,9 +81,18 @@ async def unfollow_user(user : user_dependency,
     return {"message":"You unfollowed this user"}
 
 @router.get("/get_followers",status_code=status.HTTP_200_OK)
-async def get_followers():
-    pass
+async def get_followers(user : user_dependency,
+                        db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail="Not authenticated")
 
+    followers = db.query(Followers).filter(Followers.followed_id == user.get("id")).count()
+    return followers
 @router.get("/get_followings",status_code=status.HTTP_200_OK)
-async def get_followings():
-    pass
+async def get_followings(user : user_dependency,
+                        db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail="Not authenticated")
+    
+    followings = db.query(Followers).filter(Followers.follower_id == user.get("id")).count()
+    return followings
