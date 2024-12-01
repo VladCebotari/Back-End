@@ -9,7 +9,7 @@ class Followers(Base):
     connection_id = Column(Integer, primary_key=True, autoincrement=True)
     follower_id = Column(Integer,ForeignKey('users.id'),nullable=False)
     followed_id = Column(Integer,ForeignKey('users.id'),nullable=False)
-    timestamp = Column(DateTime(timezone=True), default=func.now())
+    timestamp = Column(DateTime(timezone=True), default=func.now().op('AT TIME ZONE')('Europe/Bucharest'))
 
     follower = relationship("Users", back_populates="followers", foreign_keys=[follower_id])
     followed = relationship("Users", back_populates="following", foreign_keys=[followed_id])

@@ -56,14 +56,43 @@ async def follow_user(user : user_dependency,
 
     return {"message": "You are now following the user."}
 
-@router.post("/unfollow",status_code=status.HTTP_204_NO_CONTENT)
-async def unfollow_user():
-    pass
+@router.delete("/unfollow/{username}",status_code=status.HTTP_200_OK)
+async def unfollow_user(user : user_dependency,
+                        db: db_dependency,
+                        username : str):
+    if user is None:
+        raise HTTPException(status_code=401,detail="Not authenticated")
+    existing_user = db.query(Users).filter(Users.username == username).first()
+    if not existing_user:
+        raise HTTPException(status_code=400, detail="The user you're trying to unfollow doesn't exist")
+    followed_id = db.query(Users.id).filter(Users.username == username).first()[0]
+    existing_follow = db.query(Followers).filter(user.get("id") == Followers.follower_id,followed_id == Followers.followed_id).first()
+
+    if not existing_follow:
+        raise HTTPException(status_code=400, detail="You are not following this user")
+
+    try:
+        db.delete(existing_follow)
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(status_code=409,detail="Something went wrong try one more time")
+
+    return {"message":"You unfollowed this user"}
 
 @router.get("/get_followers",status_code=status.HTTP_200_OK)
-async def get_followers():
-    pass
+async def get_followers(user : user_dependency,
+                        db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail="Not authenticated")
 
+    followers = db.query(Followers).filter(Followers.followed_id == user.get("id")).count()
+    return followers
 @router.get("/get_followings",status_code=status.HTTP_200_OK)
-async def get_followings():
-    pass
+async def get_followings(user : user_dependency,
+                        db: db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail="Not authenticated")
+    
+    followings = db.query(Followers).filter(Followers.follower_id == user.get("id")).count()
+    return followings
