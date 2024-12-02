@@ -29,6 +29,8 @@ class Users(Base):
     is_active = Column(BOOLEAN, default=True)
     role = Column(String)
     phone_number = Column(String)
+    profile_picture = Column(String, default=None)
+
 
     dishes = relationship("Dish", back_populates="user")
     reviews = relationship("Review", back_populates="user")

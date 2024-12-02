@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from fastapi import APIRouter,Depends,HTTPException,UploadFile,File,Form,Query
 from starlette.responses import JSONResponse
 
@@ -9,7 +9,7 @@ from database import SessionLocal
 from starlette import status
 from pydantic import BaseModel
 
-from models import Dish, Like
+from models import Dish, Like, Users
 from routers.auth import get_current_user
 import base64
 
@@ -59,12 +59,26 @@ async def post_dish(user : user_dependency,
 
     return {"message": "Dish posted successfully"}
 
-@router.get("/get_all",status_code=status.HTTP_200_OK)
+@router.get("/get_all", status_code=status.HTTP_200_OK)
 async def get_all_dishes(db: db_dependency):
-    dishes = db.query(Dish).all()
-    return dishes
+    dishes = db.query(Dish).options(joinedload(Dish.user)).all()
 
+    response = [
+        {
+            "dish_id": dish.dish_id,
+            "name": dish.name,
+            "description": dish.description,
+            "ingredients": dish.ingredients,
+            "image": dish.image,
+            "like_count": dish.like_count,
+            "user_id": dish.user_id,
+            "username": dish.user.username,
+            "user_profile_picture": dish.user.profile_picture
+        }
+        for dish in dishes
+    ]
 
+    return {"dishes": response}
 
 
 @router.get("/search",status_code=status.HTTP_200_OK)
