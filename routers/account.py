@@ -1,5 +1,4 @@
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
@@ -8,7 +7,7 @@ from typing import Annotated
 from .auth import get_current_user
 import base64
 
-from models import Users,Dish
+from models import Users,Dish,Notifications
 from database import SessionLocal
 
 router=APIRouter(
@@ -67,3 +66,11 @@ async def add_profile_picture (user: user_dependency,
         raise HTTPException(status_code=500,detail=f"Unexpected error {str(e)}")
 
     return {"message": "Image updated successfully "}
+
+@router.get("/get_notifications",status_code=status.HTTP_200_OK)
+async def get_notifications(user : user_dependency,
+                            db : db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail="authentication failed")
+    all_notifications = db.query(Notifications).filter(user.get("id") == Notifications.receiver_user_id).all()
+    return all_notifications

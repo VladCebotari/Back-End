@@ -50,6 +50,16 @@ class Users(Base):
         foreign_keys=[Followers.followed_id],
         cascade="all, delete"
     )
+class Notifications(Base):
+    __tablename__ = 'notifications'
+
+    notification_id = Column(Integer,primary_key=True,autoincrement=True)
+    notification_content = Column(Text)
+    receiver_user_id = Column(Integer,ForeignKey('users.id'),nullable=False)
+    sender_user_id = Column(Integer,ForeignKey('users.id'),nullable=False)
+    seen = Column(BOOLEAN,default=False)
+    timestamp = Column(DateTime(timezone=True), default=func.now().op('AT TIME ZONE')('Europe/Bucharest'))
+
 
 class Dish(Base):
     __tablename__ = 'dish'
