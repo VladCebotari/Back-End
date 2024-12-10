@@ -7,9 +7,9 @@ from starlette.responses import JSONResponse
 
 from database import SessionLocal
 from starlette import status
-from pydantic import BaseModel
 
-from models import Dish, Like, Users
+
+from models import Dish, Like, Notifications
 from routers.auth import get_current_user
 import base64
 
@@ -123,6 +123,13 @@ async def like_dish (user : user_dependency,
             {"like_count": Dish.like_count + 1},
             synchronize_session="fetch"
         )
+        save_notifications = Notifications (
+            notification_content = f"{user.get("username")} liked your post {dish.name}",
+            receiver_user_id = dish.user_id,
+            sender_user_id = user.get("id")
+        )
+        db.add(save_notifications)
+
         db.commit()
         db.refresh(dish)
     except IntegrityError:

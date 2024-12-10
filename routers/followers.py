@@ -7,7 +7,7 @@ from database import SessionLocal
 from starlette import status
 from pydantic import BaseModel
 
-from models import Users,Followers
+from models import Users,Followers,Notifications
 from routers.auth import get_current_user
 
 
@@ -41,14 +41,20 @@ async def follow_user(user : user_dependency,
     if user.get("id") == followed_id:
         raise HTTPException(status_code=400,detail="You can't follow yourself")
 
-
-
     new_follow = Followers (
         follower_id = user.get("id"),
         followed_id = followed_id
     )
+
+    save_notifications = Notifications(
+        notification_content=f"{user.get("username")} started following you ",
+        receiver_user_id=existing_user.id,
+        sender_user_id=user.get("id")
+    )
+
     try:
         db.add(new_follow)
+        db.add(save_notifications)
         db.commit()
     except IntegrityError as e:
         db.rollback()
