@@ -1,3 +1,4 @@
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.exc import IntegrityError
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
@@ -72,5 +73,9 @@ async def get_notifications(user : user_dependency,
                             db : db_dependency):
     if user is None:
         raise HTTPException(status_code=401,detail="authentication failed")
-    all_notifications = db.query(Notifications).filter(user.get("id") == Notifications.receiver_user_id).all()
-    return all_notifications
+
+    all_notifications = db.query(Notifications.notification_content,Notifications.seen,Notifications.timestamp).filter(user.get("id") == Notifications.receiver_user_id).all()
+
+    result = [dict(zip(['notification_content','seen', 'timestamp'], row)) for row in all_notifications]
+
+    return jsonable_encoder(result)
